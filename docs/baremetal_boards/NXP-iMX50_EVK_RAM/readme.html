@@ -1,0 +1,102 @@
+<html xmlns:fn="http://www.w3.org/2005/xpath-functions">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>NXP i.MX50 EVK RAM-based Hello World Example</title>
+<link rel="stylesheet" href="../../.common/docs/shared.css" type="text/css">
+</head>
+<body>
+<div id="content_container">
+    
+    <a name="NXP_i.MX50_EVK_RAM-based_Hello_World_Example"></a><h1>NXP i.MX50 EVK RAM-based Hello World Example - Arm®Development Studio</h1>
+    
+        <div class="para">This example shows basic connection and debug illustrated by a simple bare-metal semihosted "hello world" example application loaded into on-chip RAM.</div>
+    <div class="note"><div class="para">
+<span class="bold">Note</span><br>
+                        For information on locating the example files and extracting them for use either on the command-line or in Arm Development Studio, see the <a href="../../install.html">installation instructions</a>.
+                    </div></div>
+
+    <div class="indent">
+        <a name="Purpose_and_scope"></a><h2>Purpose and scope</h2>
+        <div class="para">This example shows basic connection and debug illustrated by a simple bare-metal semihosted "hello world" example application loaded into on-chip RAM.
+        This example can be used as a framework on which to build your own basic C/C++ applications. </div>
+
+        <h3>Hardware and software requirements</h3>
+        <ul>
+           <li><div class="para">A NXP i.MX50 EVK and a suitable power supply for it.</div></li>
+           <li><div class="para">DSTREAM or ULINK debug hardware and a suitable power supply for it, and a JTAG cable to connect it to NXP i.MX50 EVK</div></li>
+        </ul>
+
+        <div class="para">This example is intended to be built with Arm Compiler 5. If you wish to modify and rebuild the example, you must use Arm Compiler 5 to rebuild it.</div>
+        <div class="para">A ready-made launch configuration <span class="arg">NXP-iMX50_EVK_RAM.launch</span> is provided.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Building_the_example"></a><h2>Building the example</h2>
+        <div class="para">This example can be built with Arm Compiler 5 using the supplied Eclipse project, or directly on the command-line with the supplied <span class="arg">Makefile</span>.</div>
+        <div class="para">The Eclipse project is a managed builder project, that creates a makefile in the /Debug directory.</div>
+        
+        <div class="para">This example depends on semihosting support being provided by the debug system.  The Debugger enables semihosting automatically if either symbols <span class="arg">__auto_semihosting</span> or <span class="arg">__semihosting_library_function</span> are present in an image.  Arm Compiler for Embedded 6 and Arm Compiler 5 both add <span class="arg">__semihosting_library_function</span> automatically to an image at link time if that image uses any semihosting-using functions.  If compiling with GCC, use an alias symbol definition such as <span class="arg">void __auto_semihosting(void) __attribute__ ((alias("main")));</span> or turn on semihosting support in the Debugger explicitly with <span class="arg">set semihosting enabled on</span>.</div>
+
+    </div>
+
+    <div class="indent">
+        <a name="Building_on_the_command-line"></a><h2>Building on the command-line</h2>
+        <div class="para">To build the example on the command-line with the supplied <span class="arg">make</span> utility:</div>
+        
+        <ul>
+           <li><div class="para">On Windows, open an <span class="interface">Arm DS Command Prompt</span> from the Start menu, run the <span class="arg">select_toolchain</span> utility, and select <span class="arg">Arm Compiler 5</span> from the list</div></li>
+           <li><div class="para">On Linux, run the <span class="arg">suite_exec</span> utility with the <span class="arg">--toolchain</span> option to select the compiler and start a shell configured for the Development Studio environment, for example: <span class="arg">~/developmentstudio/bin/suite_exec --toolchain "Arm Compiler 5" bash</span>
+</div></li>
+        </ul>
+
+        <div class="para">Then navigate to the <span class="arg">...\NXP-iMX50_EVK_RAM</span> directory, and type:</div>
+        <div class="para"><span class="arg">make</span></div>
+        <div class="para">The usual <span class="arg">make</span> rules: <span class="arg">clean</span>, <span class="arg">all</span> and <span class="arg">rebuild</span> are provided in the <span class="arg">makefile</span>.</div>
+    </div>
+
+    
+    <div class="indent">
+        <a name="Building_within_the_IDE"></a><h2>Building within the IDE</h2>
+        <div class="para">To build the supplied projects within the IDE:</div>
+        
+    <ol>
+        <li><div class="para">In the Project Explorer view, select the project you want to build.</div></li>
+        <li><div class="para">Select <span class="menu">Project<span class="para"> → </span>Build Project</span>.</div></li>
+    </ol>
+
+    </div>
+
+
+    <div class="indent">
+        <a name="Connecting_and_running_the_example"></a><h2>Connecting and running the example</h2>
+        <ol>
+            <li><div class="para">Power-up the NXP i.MX50 EVK, let its loader initialize and prevent the OS boot.</div></li>
+            <li><div class="para">Select <span class="menu">Run<span class="para"> → </span>Debug Configurations...</span>.</div></li>
+            <li><div class="para">Select the <span class="arg">NXP-iMX50_EVK_RAM</span> from the list of <span class="interface">Generic Arm C/C++ Application</span> configurations.</div></li>
+            <li><div class="para">In the Connections panel, enter the USB: or TCP: IP address or name of your DSTREAM or ULINK unit in the Debug Hardware Address field,
+                or click on <span class="interface">Browse</span> to select one from a list, otherwise an error will be reported:
+                <span class="arg">
+        <span class="arg">Launch configuration has errors: Configuration for connection type 'Bare Metal Debug' is not valid - Connection cannot be empty</span>
+</span>.</div></li>
+            <li><div class="para">Click on <span class="interface">Debug</span> to start debugging.  The example image will be downloaded to the target and it will
+                run to the <span class="arg">main</span>.</div></li>
+
+            <li><div class="para">Run the executable (press F8).  "Hello world" output appears in the <span class="interface">App Console</span>.</div></li>
+        </ol>
+    </div>
+
+    <h2>See also:</h2>
+<div class="indent"><ul>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101470/latest/"><i>Arm Development Studio User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101471/latest/"><i>Arm Debugger Command Reference</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100955/latest"><i>DSTREAM User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/dui0472/latest/"><i>Arm Compiler 5 armcc User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/dui0473/latest/"><i>Arm Compiler 5 armasm User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/dui0474/latest/"><i>Arm Compiler 5 armlink User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/dui0471/latest/"><i>Arm Compiler 5 Software Development Guide</i></a></div></li>
+    </ul></div>
+</div>
+<div class="double_dotted_divider"></div>
+<div class="footer">Copyright© 2010-2022 Arm Limited (or its affiliates). All rights reserved.</div>
+</body>
+</html>

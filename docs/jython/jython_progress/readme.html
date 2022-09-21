@@ -1,0 +1,72 @@
+<html xmlns:fn="http://www.w3.org/2005/xpath-functions">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Jython Progress Monitor Example</title>
+<link rel="stylesheet" href="../../.common/docs/shared.css" type="text/css">
+</head>
+<body>
+<div id="content_container">
+    
+    <a name="Jython_Progress_Monitor_Example"></a><h1>Jython Progress Monitor Example - Arm®Development Studio</h1>
+    
+        <div class="para">This example illustrates the use of a Jython script in the Debugger with the Progress Monitor to keep the user updated.</div>
+    <div class="note"><div class="para">
+<span class="bold">Note</span><br>
+                        For information on locating the example files and extracting them for use either on the command-line or in Arm Development Studio, see the <a href="../../install.html">installation instructions</a>.
+                    </div></div>
+
+    <div class="indent">
+        <a name="Purpose_and_scope"></a><h2>Purpose and scope</h2>
+        <div class="para">This example illustrates the use of a Jython script in the Debugger with the Progress Monitor to keep the user updated on the progress of execution of the example.
+        This example prints some sentences (deliberately slowly) each containing a number of words, and the Progress Monitor shows the progress of the printing of the words and sentences.
+        This example is intended to illustrate features of the Debugger - it is not intended to be a tutorial on Jython.</div>
+
+        <div class="para">This example is configured to use the FVP model of Versatile Express with Cortex-A9x1 Core Tile (Cortex-A9x1 FVP model), and no extra hardware or software is required.  No instructions are actually executed on the model - the model connection is just a convenience for the debugger.
+        A ready-made launch configuration <span class="arg">jython_progress-FVP.launch</span> is provided for this.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Running_the_example"></a><h2>Running the example</h2>
+        <ol>
+            <li><div class="para">Select <span class="menu">Run<span class="para"> → </span>Debug Configurations...</span>.</div></li>
+            <li><div class="para">Select the <span class="arg">jython_progress-FVP</span> from the list of <span class="interface">Generic Arm C/C++ Application</span> configurations.</div></li>
+        </ol>
+        <div class="para">After the Cortex-A9x1 FVP model has started up, and the Debugger connected to it, the following command is executed:</div>
+        <ol>
+            <li>
+<div class="para"><span class="arg">source jython_progress/progress_monitor.py</span></div>
+            <div class="para">This command runs the Jython script.</div>
+</li>
+        </ol>
+        <div class="para">The full output in the <span class="interface">Command view</span> looks like this:</div>
+<pre class="code">
+Connected to stopped target Arm FVP (Installed with Arm DS) - VE_Cortex_A9x1
+cd "C:\Users\yourname\Development Studio Workspace"
+Working directory "C:\Users\yourname\Development Studio Workspace"
+Execution stopped in SVC mode at S:0x00000000
+S:0x00000000   DCI      0xe7ff0010 ; ? Undefined
+source jython_progress/progress_monitor.py
+Lorem ipsum dolor sit amet, consectetur adipiscing elit
+Duis neque nibh, facilisis sed rutrum vitae, lobortis feugiat dolor
+</pre>
+
+        <div class="para">You can cancel any sentence monitor or word sub-monitor without cancelling the whole script, try it by clicking one of the red stop buttons.</div>
+        <div class="para">In this example, the Jython script <span class="arg">progress_monitor.py</span> is executed as one of a set of debugger commands that are executed automatically when a connection is established.  It is also possible to invoke the Jython script manually:</div>
+        <div class="para">In the <span class="interface">Command</span> field of the <span class="interface">Command</span> view, enter the <span class="arg">source</span> command to run <span class="arg">progress_monitor.py</span>, for example:</div>
+<pre class="code">
+source jython_progress/progress_monitor.py
+</pre>
+        <div class="para">Alternatively, "drag and drop" the <span class="arg">progress_monitor.py</span> file from the <span class="interface">Project Explorer</span> view into the <span class="interface">Scripts</span> view, then double-click on it to execute it.  The <span class="interface">Jython Script Parameters</span> control in the <span class="interface">Scripts</span> view also allows you to specify parameters to be passed to a script.</div>
+    </div>
+
+    <h2>See also:</h2>
+<div class="indent"><ul>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101470/latest/Debugging-with-Scripts"><i>Debugging with Scripts</i> in <i>Arm Development Studio User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101469/latest/Debugging-code/Overview--Debug-connections-in-Arm-Debugger"><i>Debug connections in Arm Debugger</i> in <i>Arm Development Studio Getting Started Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100955/latest"><i>DSTREAM User Guide</i></a></div></li>
+    </ul></div>
+</div>
+<div class="double_dotted_divider"></div>
+<div class="footer">Copyright© 2010-2022 Arm Limited (or its affiliates). All rights reserved.</div>
+</body>
+</html>

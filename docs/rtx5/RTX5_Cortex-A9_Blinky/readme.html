@@ -1,0 +1,150 @@
+<html xmlns:fn="http://www.w3.org/2005/xpath-functions">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>RTX5 RTOS example for Cortex-A9</title>
+<link rel="stylesheet" href="../../.common/docs/shared.css" type="text/css">
+</head>
+<body>
+<div id="content_container">
+    
+    <a name="RTX5_RTOS_example_for_Cortex-A9"></a><h1>RTX5 RTOS example for Cortex-A9 - Arm®Development Studio</h1>
+    
+        <div class="para">This example shows RTX5 RTOS on a Cortex-A9 processor, compilation with Arm Compiler for Embedded 6 and OS awareness in the Debugger.</div>
+    <div class="note"><div class="para">
+<span class="bold">Note</span><br>
+                        For information on locating the example files and extracting them for use either on the command-line or in Arm Development Studio, see the <a href="../../install.html">installation instructions</a>.
+                    </div></div>
+
+    <div class="indent">
+        <a name="Purpose_and_scope"></a><h2>Purpose and scope</h2>
+        <div class="para">This example shows RTX5 RTOS on a Cortex-A9 processor, compilation with Arm Compiler for Embedded 6 and OS awareness in the Debugger.</div>
+        <div class="para">This example is intended to be built with Arm Compiler for Embedded 6. If you wish to modify and rebuild the example, you must use Arm Compiler for Embedded 6 to rebuild it.</div>
+        <div class="para">This example is intended to run on the Cortex-A9x1 FVP model supplied with Development Studio.  
+        A ready-made launch configuration <span class="arg">RTX5_Cortex-A9_Blinky_FVP.launch</span> is provided to run the example on the Cortex-A9x1 FVP model.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Overview_of_the_example_code"></a><h2>Overview of the example code</h2>
+        <div class="para">The example comprises a simple application in <span class="arg">main.c</span> that creates and executes a number of threads.  
+        It calls RTX5 RTOS functions from the referenced CMSIS Pack, and outputs characters to a UART via a simple driver <span class="arg">retarget.c</span> and <span class="arg">uart.c</span>.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Building_the_example"></a><h2>Building the example</h2>
+        <div class="para">A pre-built executable is provided, so there is no need to build the example unless you modify the source code.</div>
+        <div class="para">This example can be built with Arm Compiler for Embedded 6 using the supplied Eclipse managed builder project, or directly on the command-line with the supplied <span class="arg">makefile</span>.</div>
+        <div class="para">The example depends on CMSIS Pack 5.8.0 (or later), which will be installed automatically by the Pack Manager, 
+        unless "Automatically install missing Packs when loading projects" in the "CMSIS Packs" preference page has been unticked.
+        To install the Pack manually, switch to the <span class="interface">CMSIS Pack Manager</span> perspective then, in the <span class="interface">Packs</span> tab, enter "ARM.CMSIS",
+        locate <span class="interface">5.8.0</span> (or later) in the list, then click on <span class="interface">Install</span>.</div>
+        <div class="para">If building on the command-line with the supplied <span class="arg">makefile</span>, you must also set the <span class="arg">CMSIS_PACK</span> environment variable in the <span class="arg">makefile</span> to the Pack's installation folder.</div>
+        <div class="para">CMSIS Packs are Open Source.  The source code can be downloaded from <a href="https://github.com/arm-software/CMSIS_5/releases" title="External link"><i>GitHub</i></a>.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Building_on_the_command-line"></a><h2>Building on the command-line</h2>
+        <div class="para">Before building this example, first install the ARM.CMSIS.5.8.0 (or later) Pack using the Pack Manager, then edit the makefile to set CMSIS_PACK to its folder path.</div>
+        <div class="para">To build the example on the command-line with the supplied <span class="arg">make</span> utility:</div>
+        
+        <ul>
+           <li><div class="para">On Windows, open an <span class="interface">Arm DS Command Prompt</span> from the Start menu, run the <span class="arg">select_toolchain</span> utility, and select <span class="arg">Arm Compiler for Embedded 6</span> from the list</div></li>
+           <li><div class="para">On Linux, run the <span class="arg">suite_exec</span> utility with the <span class="arg">--toolchain</span> option to select the compiler and start a shell configured for the Development Studio environment, for example: <span class="arg">~/developmentstudio/bin/suite_exec --toolchain "Arm Compiler for Embedded 6" bash</span>
+</div></li>
+        </ul>
+
+        <div class="para">Then navigate to the <span class="arg">...\RTX5_Cortex-A9_Blinky</span> directory, and type:</div>
+        <div class="para"><span class="arg">make</span></div>
+        <div class="para">The usual <span class="arg">make</span> rules: <span class="arg">clean</span>, <span class="arg">all</span> and <span class="arg">rebuild</span> are provided in the <span class="arg">makefile</span>.</div>
+    </div>
+
+    
+    <div class="indent">
+        <a name="Building_within_the_IDE"></a><h2>Building within the IDE</h2>
+        <div class="para">To build the supplied projects within the IDE:</div>
+        
+    <ol>
+        <li><div class="para">In the Project Explorer view, select the project you want to build.</div></li>
+        <li><div class="para">Select <span class="menu">Project<span class="para"> → </span>Build Project</span>.</div></li>
+    </ol>
+
+    </div>
+
+
+    <div class="indent">
+        <a name="Running_the_example_on_Cortex-A9x1_FVP_model"></a><h2>Running the example on Cortex-A9x1 FVP model</h2>
+        <ol>
+            <li><div class="para">Select <span class="menu">Run<span class="para"> → </span>Debug Configurations...</span>.</div></li>
+            <li>
+<div class="para">In the <span class="interface">Debug Configurations</span> dialog, expand the list of <span class="interface">Generic Arm C/C++ Application</span> configurations on the left-hand side,
+                and select <span class="arg">RTX5_Cortex-A9_Blinky_FVP</span>.</div>
+            <div class="para">In the <span class="interface">Connection</span> tab, see the platform (Cortex-A9x1 FVP model) and debug activity ("Bare Metal Debug of Cortex-A9x1") is already selected.</div>
+            <div class="para">In the <span class="interface">Files</span> tab, see the executable to be downloaded to the target is specified, and <span class="interface">Load symbols</span> is ticked to allow debug at source-level.</div>
+            <div class="para">In the <span class="interface">Debugger</span> tab, see the run control <span class="interface">Debug from entry point</span> is selected.</div>
+            <div class="para">In the <span class="interface">OS Awareness</span> tab, see that <span class="interface">Keil CMSIS-RTOS RTX OS</span> awareness is selected.</div>
+</li>
+            <li><div class="para">Click on <span class="interface">Debug</span> to start debugging.  The example executable will be downloaded to the target,
+                and the program counter PC will be set to the entry point of the image.</div></li>
+
+            <li><div class="para">Run the executable by clicking on the green <span class="interface">Continue</span> button in the <span class="interface">Debug Control</span> view, or by pressing F8 on the keyboard.  Text output appears in the <span class="interface">Telnet</span> window.</div></li>
+            <li><div class="para">Stop execution by clicking on the yellow <span class="interface">Interrupt</span> button in the <span class="interface">Debug Control</span> view, or by pressing F9.</div></li>
+            <li><div class="para">Disconnect by clicking on the <span class="interface">Disconnect from Target</span> button in the Debug Control view.</div></li>
+        </ol>
+        <div class="para">You can also run the example executable directly on the FVP model from within the <span class="interface">Arm DS Command Prompt</span> on Windows or the <span class="arg">suite_exec</span> shell on Linux with, for example:</div>
+<pre class="code">
+FVP_VE_Cortex-A9x1 -a RTX5_Cortex-A9_Blinky.axf
+</pre>
+    </div>
+
+    <div class="indent">
+        <a name="Debugging_the_example_with_OS_awareness"></a><h2>Debugging the example with OS awareness</h2>
+        <ol>
+            <li><div class="para">Re-establish the debug connection by double-clicking on <span class="arg">RTX5_Cortex-A9_Blinky_FVP</span> that is now in the <span class="interface">Debug Control</span> view.</div></li>
+            <li><div class="para">If the <span class="interface">OS Data</span> view is not yet open, then open it with <span class="menu">Window<span class="para"> → </span>Show View<span class="para"> → </span>OS Data</span>.</div></li>
+            <li><div class="para">Open <span class="arg">main.c</span> and set a breakpoint on a line of code inside one of the threads.</div></li>
+            <li><div class="para">Run the executable by clicking on the green <span class="interface">Continue</span> button in the <span class="interface">Debug Control</span> view, or by pressing F8 on the keyboard, and wait for code execution to stop at the breakpoint.</div></li>
+            <li><div class="para">The current state of the core is displayed in the <span class="interface">Debug Control</span> view.  To show the threads, right-mouse-click on the connection, then select <span class="interface">Display Threads</span>.
+                The current thread is shown, and you can also expand <span class="interface">Active Threads</span> and <span class="interface">All Threads</span>.</div></li>
+            <li><div class="para">In the <span class="interface">OS Data</span> view, you can select various tables to view more details of the tasks, mailboxes, mutexes, semaphores, etc. from the <span class="interface">Select a table</span> pull-down list.
+                For example, select <span class="interface">Tasks</span> to see detail of the tasks, or select <span class="interface">System</span> to view system-level details.</div></li>
+        </ol>
+    </div>
+
+    <div class="indent">
+        <a name="Task-aware_breakpoints"></a><h2>Task-aware breakpoints</h2>
+        <div class="para">Task-aware breakpoints relate to sub-routines that might be called from several different threads.  
+        If an ordinary breakpoint is set on a sub-routine, code execution will stop each time it gets called.  
+        If a task-aware breakpoint is set on that sub-routine, it will stop only if that sub-routine was called from a selected task(s).
+        To see this in action:</div>
+        <ol>
+            <li><div class="para">In <span class="arg">main.c</span>, notice that <span class="arg">signal_func()</span> is called from several different threads.</div></li>
+            <li><div class="para">Using the CLI, set a breakpoint on signal_func() with "break signal_func", and run to it.
+                In the <span class="interface">Stack</span> view, you should see signal_func() was called from one of the threads e.g. phaseA.</div></li>
+            <li><div class="para">Run again.  You should now see signal_func() was called from phaseB.</div></li>
+            <li><div class="para">Run again.  You should now see signal_func() was called from phaseC.</div></li>
+            <li><div class="para">Run again.  You should now see signal_func() was called from phaseD.</div></li>
+            <li><div class="para">Suppose you want to only stop on signal_func() when it is called from phaseC.  This can be done by changing this ordinary breakpoint into a task-aware breakpoint.  
+                In the <span class="interface">Breakpoints</span> view, right-mouse click on the signal_func breakpoint, select <span class="interface">Properties</span>, 
+                tick <span class="interface">Break on Selected Threads or Cores</span> and untick <span class="interface">Break on all</span>.  
+                Click on <span class="interface">Show threads</span> then scroll-down the list and tick phaseC.</div></li>
+            <li><div class="para">Run again.  After a few seconds, code stops in signal_func().  In the <span class="interface">Stack</span> view, you should now see signal_func() was called from phaseC.
+                This "task-aware breakpoint" has filtered-out function calls from only those threads you are interested in.</div></li>
+            <li><div class="para">Delete all breakpoints and disconnect the Debugger.</div></li>
+        </ol>
+    </div>
+
+    <h2>See also:</h2>
+<div class="indent"><ul>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101469/latest/Debugging-code/Overview--Debug-connections-in-Arm-Debugger"><i>Debug connections in Arm Debugger</i> in <i>Arm Development Studio Getting Started Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101470/latest/"><i>Arm Development Studio User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101471/latest/"><i>Arm Debugger Command Reference</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100966/latest/"><i>Fixed Virtual Platforms FVP Reference Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100955/latest"><i>DSTREAM User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100748/latest/"><i>Arm Compiler for Embedded 6 User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101754/latest"><i>Arm Compiler for Embedded 6 Reference Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100066/latest/"><i>Arm Compiler for Embedded 6 Software Development Guide</i></a></div></li>
+    </ul></div>
+</div>
+<div class="double_dotted_divider"></div>
+<div class="footer">Copyright© 2010-2022 Arm Limited (or its affiliates). All rights reserved.</div>
+</body>
+</html>

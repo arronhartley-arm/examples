@@ -1,0 +1,100 @@
+<html xmlns:fn="http://www.w3.org/2005/xpath-functions">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Jython MD5 Hash Example</title>
+<link rel="stylesheet" href="../../.common/docs/shared.css" type="text/css">
+</head>
+<body>
+<div id="content_container">
+    
+    <a name="Jython_MD5_Hash_Example"></a><h1>Jython MD5 Hash Example - Arm®Development Studio</h1>
+    
+        <div class="para">This example illustrates the use of a Jython script in the Debugger to generate an MD5 Hash on some data in memory.</div>
+    <div class="note"><div class="para">
+<span class="bold">Note</span><br>
+                        For information on locating the example files and extracting them for use either on the command-line or in Arm Development Studio, see the <a href="../../install.html">installation instructions</a>.
+                    </div></div>
+
+    <div class="indent">
+        <a name="Purpose_and_scope"></a><h2>Purpose and scope</h2>
+        <div class="para">This example illustrates the use of a Jython script in the Debugger to generate an MD5 Hash on some data in memory.  
+        It uses both standard Jython library functions (such as <span class="arg">hashlib</span>) and Jython classes/services provided by the Debugger (such as <span class="arg">getMemoryService().read()</span>) to perform the operation.
+        This script can be invoked in several different ways.  This example shows one way: loading a string in memory for the script to operate on.
+        This example is intended to illustrate features of the Debugger - it is not intended to be a tutorial on Jython.</div>
+
+        <h3>Hardware and software requirements</h3>
+        <div class="para">This example is configured to use the FVP model of Versatile Express with Cortex-A9x1 Core Tile (Cortex-A9x1 FVP model), and no extra hardware or software is required.
+        A ready-made launch configuration <span class="arg">jython_hash-FVP.launch</span> is provided for this.</div>
+        <div class="para">It could be used with the Debugger connected to any bare-metal target with sufficient memory to hold the test data at a predetermined address.
+        For the case of a real hardware target, the following will be required:</div>
+        <ul>
+           <li><div class="para">A target hardware e.g. a BeagleBoard and a suitable power supply for it.</div></li>
+           <li><div class="para">DSTREAM or ULINK debug hardware and a suitable power supply for it, and a JTAG cable to connect it to BeagleBoard</div></li>
+           <li><div class="para">A serial terminal emulator such as the Terminal view in Development Studio, PuTTY, TeraTerm, or Minicom for Linux, connected via a serial cable to your platform.
+This may be needed when running the example on real target hardware, to monitor the Boot Loader and provide a serial terminal interface.  This is not needed if using a software model as that provides its own terminal.
+To open the Terminal view in Development Studio, select <span class="menu">Window<span class="para"> → </span>Show View<span class="para"> → </span>Other...</span> to open the Show View dialog box, then expand the <span class="interface">Terminal</span> group and select <span class="interface">Terminal</span>, and click <span class="interface">OK</span>.
+To configure the terminal settings, click on <span class="interface">Open a Terminal</span> in the <span class="interface">Terminal</span> view, then select the required connection type (for example, Serial Terminal), then enter the required settings (for example, 38400 baud, 8 bits, no parity, 1 stop bit) and click <span class="interface">OK</span>.
+</div></li>
+        </ul>
+
+    </div>
+
+    <div class="indent">
+        <a name="Running_the_example"></a><h2>Running the example</h2>
+        <ol>
+            <li><div class="para">Select <span class="menu">Run<span class="para"> → </span>Debug Configurations...</span>.</div></li>
+            <li><div class="para">To run on Cortex-A9x1 FVP model, select the <span class="arg">jython_hash-FVP</span> from the list of <span class="interface">Generic Arm C/C++ Application</span> configurations.</div></li>
+            <li><div class="para">Click on <span class="interface">Debug</span> to start the debugging and run to the <span class="arg">main()</span> function.</div></li>
+        </ol>
+        <div class="para">After the Cortex-A9x1 FVP model has started up, and the Debugger connected to it, the following commands are executed:</div>
+        <ol>
+            <li>
+<div class="para"><span class="arg">memory set 0x8000 0 "The quick brown fox jumps over the lazy dog"</span></div>
+            <div class="para">This command copies the ASCII string into memory, starting at address 0x8000.  Other addresses should be used if this does not exist on your target hardware.  For example, if connected to a BeagleBoard, use, say, 0x80008000 instead.</div>
+</li>
+            <li>
+<div class="para"><span class="arg">source jython_hash/memhash.py 0x8000 100 -0</span></div>
+            <div class="para">This command runs the Jython script with some parameters.  Specify the same base address as in the previous step.</div>
+</li>
+            <li>
+<div class="para"><span class="arg">output "The result should be 9e107d9d372bb6826bd81d3542a419d6"</span></div>
+            <div class="para">This command simply displays the correct hash for comparison purposes.</div>
+</li>
+        </ol>
+        <div class="para">The full output in the <span class="interface">Command view</span> looks like this:</div>
+<pre class="code">
+Connected to stopped target Arm FVP (Installed with Arm DS) - VE_Cortex_A9x1
+cd "C:\Users\yourname\Development Studio Workspace"
+Working directory "C:\Users\yourname\Development Studio Workspace"
+Execution stopped in SVC mode at S:0x00000000
+S:0x00000000   DCI      0xe7ff0010 ; ? Undefined
+memory set 0x8000 0 "The quick brown fox jumps over the lazy dog"
+source jython_hash/memhash.py 0x8000 100 -0
+Reading memory...
+Read 43 bytes of memory starting from address 0x8000
+MD5 hash is: 9e107d9d372bb6826bd81d3542a419d6
+output "The result should be 9e107d9d372bb6826bd81d3542a419d6"
+"The result should be 9e107d9d372bb6826bd81d3542a419d6"
+</pre>
+
+        <div class="para">In this example, the Jython script <span class="arg">memhash.py</span> is executed as one of a set of debugger commands that are executed automatically when a connection is established.  It is also possible to invoke the Jython script manually:</div>
+        <div class="para">In the <span class="interface">Command</span> field of the <span class="interface">Command</span> view, enter the <span class="arg">source</span> command to run <span class="arg">memhash.py</span>, for example:</div>
+<pre class="code">
+source jython_hash/memhash.py 0x8000 100 -0
+</pre>
+        <div class="para">Alternatively, "drag and drop" the <span class="arg">memhash.py</span> file from the <span class="interface">Project Explorer</span> view into the <span class="interface">Scripts</span> view, then double-click on it to execute it.  The <span class="interface">Jython Script Parameters</span> control in the <span class="interface">Scripts</span> view also allows you to specify parameters to be passed to a script.</div>
+
+
+    </div>
+
+    <h2>See also:</h2>
+<div class="indent"><ul>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101470/latest/Debugging-with-Scripts"><i>Debugging with Scripts</i> in <i>Arm Development Studio User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101469/latest/Debugging-code/Overview--Debug-connections-in-Arm-Debugger"><i>Debug connections in Arm Debugger</i> in <i>Arm Development Studio Getting Started Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100955/latest"><i>DSTREAM User Guide</i></a></div></li>
+    </ul></div>
+</div>
+<div class="double_dotted_divider"></div>
+<div class="footer">Copyright© 2010-2022 Arm Limited (or its affiliates). All rights reserved.</div>
+</body>
+</html>

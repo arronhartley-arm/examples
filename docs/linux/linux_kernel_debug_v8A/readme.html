@@ -1,0 +1,466 @@
+<html xmlns:fn="http://www.w3.org/2005/xpath-functions">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Debugging the Armv8-A Linux Kernel</title>
+<link rel="stylesheet" href="../../.common/docs/shared.css" type="text/css">
+</head>
+<body>
+<div id="content_container">
+    
+    <a name="Debugging_the_Armv8-A_Linux_Kernel"></a><h1>Debugging the Armv8-A Linux Kernel - Arm®Development Studio</h1>
+    <div class="toc"><div class="indent">
+<b>Table of Contents:</b><ul>
+<li><a href="#Purpose_and_scope">Purpose and scope</a></li>
+<li><a href="#Setting_up_Linux_on_the_Armv8-A_Base_Platform_model">Setting up Linux on the Armv8-A Base Platform model</a></li>
+<li><a href="#Creating_a_debug_launcher">Creating a debug launcher</a></li>
+<li><a href="#Running_to_the_Entry_Point_of_the_Kernel">Running to the Entry Point of the Kernel</a></li>
+<li><a href="#Debugging_the_Kernel_:_Pre-MMU_Stage">Debugging the Kernel : Pre-MMU Stage</a></li>
+<li><a href="#Debugging_the_Kernel_:_Post-MMU_Stage">Debugging the Kernel : Post-MMU Stage</a></li>
+<li><a href="#Debugging_the_Kernel_:_Thread_awareness">Debugging the Kernel : Thread awareness</a></li>
+<li><a href="#Known_issues_and_troubleshooting">Known issues and troubleshooting</a></li>
+</ul>
+</div></div>
+    
+        <div class="para">This tutorial demonstrates debugging the Armv8-A Linux kernel with the Debugger.</div>
+    <div class="note"><div class="para">
+<span class="bold">Note</span><br>
+                        For information on locating the example files and extracting them for use either on the command-line or in Arm Development Studio, see the <a href="../../install.html">installation instructions</a>.
+                    </div></div>
+
+    <div class="indent">
+        <a name="Purpose_and_scope"></a><h2>Purpose and scope</h2>
+        <div class="para">To develop, port and debug the Linux kernel on a platform, you will need to be able to set breakpoints, view registers, view memory, single-step at source level and so on -
+        all the normal facilities provided by a debugger.  You may also need to do these both <span class="italic">before</span> the MMU is enabled (with a physical memory map), and <span class="italic">after</span>
+        the MMU is enabled (with a virtual memory map).  The Debugger allows you to do all this and more, not just for single-core platforms, but for multi-core SMP platforms too.</div>
+        <div class="para">This tutorial shows how to debug the Armv8-A Linux kernel in a multi-core SMP system with the Debugger.
+        The Linux target used here is a pre-built Linux distribution running on an Armv8-A Base Platform model, but a real Arm Linux hardware platform could also be used.</div>
+        <div class="para">The Armv8-A Base Platform model and Armv8-A Linux kernel (pre-built for debug, complete with vmlinux symbol file, file system and source tree) are both available as downloads (see below).
+        The boot loader used here is the Trusted Firmware and U-Boot.</div>
+
+        <div class="para">This tutorial demonstrates the capabilities of the Debugger to allow you to:</div>
+        <ul>
+           <li><div class="para">Debug the kernel before the MMU is enabled (with a physical memory map)</div></li>
+           <li><div class="para">Debug the kernel after the MMU is enabled (with a virtual memory map)</div></li>
+           <li><div class="para">Debug on a multi-core SMP platform</div></li>
+           <li><div class="para">View the threads running on each core and their execution contexts</div></li>
+           <li><div class="para">View earlyprintk/bootconsole output, even if the console is not enabled, or there is no serial port connected</div></li>
+           <li><div class="para">View the Task Control Block (<span class="arg">task_struct</span> or <span class="arg">thread_info</span>)</div></li>
+           <li><div class="para">Explore the operation of the scheduler</div></li>
+        </ul>
+        <div class="para">This example is intended to show off features of the Debugger - it is not intended to be a tutorial on the Linux kernel.</div>
+
+        <h3>Hardware and software requirements</h3>
+        <div class="para">A host workstation (Linux or Windows) with Python3 and Development Studio installed is required.</div>
+
+        <h3>Terminology</h3>
+        <div class="para">This document discusses 'host' and 'target' systems. The 'host' system is the Linux or Windows desktop computer that you use for most of your work.
+        The 'target' system is some Arm-based hardware (or model of such hardware) on which Arm Linux is running.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Setting_up_Linux_on_the_Armv8-A_Base_Platform_model"></a><h2>Setting up Linux on the Armv8-A Base Platform model</h2>
+        <div class="para">This section describes how to obtain the model and the Linux distribution, and how to boot Linux on the model.
+        This does not need to be done if you intend to debug Linux on real hardware that has Linux already installed.</div>
+        <ol>
+            <li><div class="para">First download the <a href="https://developer.arm.com/tools-and-software/simulation-models/fixed-virtual-platforms" title="External link"><i>Armv8-A Base Platform model</i></a>.</div></li>
+            <li><div class="para">Download the pre-built (debug) Armv8-A Linux software stack, including the vmlinux symbol file, file system and kernel source tree, using the
+            <a href="https://community.arm.com/developer/tools-software/oss-platforms/w/docs/509/fvps" title="External link"><i>instructions for using Arm Platform deliverables on an FVP</i></a>.
+            This example uses the Linaro 17.10 "[64-bit] AEMv8-A Base Platform FVP" platform with "[DEBUG] latest-armlt + OpenEmbedded Minimal 15.09" software stack and file system</div></li>
+            <li><div class="para">To debug at source-level, the Linux kernel source tree is needed.  This example uses Linux 4.12.0.
+            On Linux hosts, the kernel sources can be obtained using the instructions in the previous step.
+            On Windows hosts, the kernel sources can be obtained from <a href="https://www.kernel.org/pub/linux/kernel/v4.x/" title="External link"><i>linux.org</i></a>
+</div></li>
+            <li><div class="para">On Windows hosts, from the Start menu, open an <span class="interface">Arm DS Command Prompt</span>, then navigate to the folder where the Armv8-A Linux images were saved, for example, <span class="arg">...\fvp-latest-oe-uboot</span>
+</div></li>
+            <li><div class="para">On Linux hosts, navigate to the folder where the Armv8-A Linux images were saved</div></li>
+            <li>
+<div class="para">Launch the model with all the parameters needed to boot Linux with:</div>
+            <div class="para"><span class="arg">FVP_Base_AEMv8A -C bp.secure_memory=0 -C cache_state_modelled=0 -C bp.pl011_uart0.untimed_fifos=1 -C bp.secureflashloader.fname=bl1.bin -C bp.flashloader0.fname=fip.bin --data cluster0.cpu0=Image@0x80080000 --data cluster0.cpu0=fvp-base-aemv8a-aemv8a.dtb@0x82000000 --data cluster0.cpu0=ramdisk.img@0x84000000 -C bp.ve_sysregs.mmbSiteDefault=0 -C bp.virtioblockdevice.image_path=../lt-vexpress64-openembedded_minimal-armv8-gcc-4.9_20150912-729.img -C bp.smsc_91c111.enabled=true -C bp.hostbridge.userNetworking=true -C bp.hostbridge.userNetPorts="5555=5555,8080=8080,22=22" --iris-server</span></div>
+            <div class="para">Port 5555 is used for debug, 22 for sshd, and 8080 for httpd.</div>
+            <div class="para">The <span class="arg">--iris-server</span> parameter tells the model to wait for a debugger to be connected.</div>
+</li>
+        </ol>
+    </div>
+
+    <div class="indent">
+        <a name="Creating_a_debug_launcher"></a><h2>Creating a debug launcher</h2>
+        <div class="para">A ready-made debug launcher <span class="arg">linux_kernel_debug_v8A.launch</span> is provided, that was made as follows:</div>
+        <ol>
+            <li><div class="para">Launch <span class="interface">Arm Development Studio</span>
+</div></li>
+            <li><div class="para">Select <span class="menu">Run<span class="para"> → </span>Debug Configurations...</span> to open the <span class="interface">Debug Configurations</span> dialog</div></li>
+            <li><div class="para">In the left-hand column of the <span class="interface">Debug Configurations</span> dialog, select <span class="interface">Generic Arm C/C++ Application</span>, then click on
+            <span class="interface">New launch configuration</span> (icon in top left corner) to create a new Debug Configuration.  Give it a name, for example, "linux_kernel_debug_v8A"</div></li>
+            <li><div class="para">In the <span class="interface">Connection tab</span>, type "AEM" in the <span class="interface">Filter Platforms</span> filter so that only the matching platforms are shown,
+            then select <span class="menu">Arm FVP<span class="para"> → </span>Base_AEMv8Ax4<span class="para"> → </span>Linux Kernel Debug<span class="para"> → </span>ARMAEMv8-A_MPx4 SMP</span>
+</div></li>
+            <li><div class="para">Select <span class="interface">Connect to an already running model</span> with <span class="interface">Connection address</span> as "localhost" (assuming the model is running on the local machine)</div></li>
+            <li><div class="para">Press the <span class="interface">DTSL Options Edit...</span> button.  In the <span class="interface">Trace Configuration</span> tab,
+            select the <span class="interface">Trace capture method</span> as <span class="interface">Fast Models Trace</span>, then <span class="interface">OK</span>
+</div></li>
+            <li><div class="para">In the <span class="interface">Debugger</span> tab, select the <span class="interface">Run Control</span> as <span class="interface">Connect only</span>
+</div></li>
+            <li><div class="para">In the <span class="interface">Debugger</span> tab, tick <span class="interface">Execute debugger commands</span>, then enter this command into the field: <span class="arg">thbreak EL2:0x80080000</span>
+</div></li>
+            <li><div class="para">Alternatively, instead of launching the model from the command-line with the -C model parameters as shown earlier, you can launch the model from the Debugger
+            by adding the -C model parameters into the <span class="interface">Model parameters</span> field at the foot of <span class="interface">Connection tab</span>.
+            The Debugger will automatically tell the model to start an Iris server to enable a debug connection, so there is no need to include the <span class="arg">--iris-server</span> switch.</div></li>
+         </ol>
+    </div>
+
+    <div class="indent">
+        <a name="Running_to_the_Entry_Point_of_the_Kernel"></a><h2>Running to the Entry Point of the Kernel</h2>
+        <ol>
+            <li>
+            <div class="para">At the bottom right of the <span class="interface">Debug Configurations</span> dialog, click on <span class="interface">Debug</span> to connect the Debugger to the model.
+            The connection information in the <span class="interface">Commands</span> view shows the target is initially stopped at the entry point of the Trusted Firmware - address 0x0 in EL3:</div>
+<pre class="code">
+Signals handled by operating system
+Connected to stopped target Arm FVP - Base_AEMv8Ax4
+cd "C:\Users\yourname\Development Studio Workspace"
+Execution stopped in EL3h mode at EL3:0x0000000000000000
+On core ARMAEMv8-A_MP_0 (ID 0)
+EL3:0x0000000000000000   MOV      x0,#0x830
+Working directory "C:\Users\yourname\Development Studio Workspace"
+thbreak EL2:0x80080000
+Hardware breakpoint 1 at EL2:0x0000000080080000
+</pre>
+            </li>
+            <li>
+            <div class="para">Start the target running by pressing the green <span class="interface">Continue</span> button in the <span class="interface">Debug Control</span> view, or press <span class="interface">F8</span>.
+            The model will start by running the Trusted Firmware, then U-Boot.  U-Boot then jumps to the entry point of the kernel.
+            Wait a few seconds for the breakpoint at the entry point of the kernel to be hit.</div>
+<pre class="code">
+NOTICE:  Booting Trusted Firmware
+NOTICE:  BL1: v1.4(debug):v1.4-307-g3b39efa4
+NOTICE:  BL1: Built : 07:20:30, Nov 16 2017
+INFO:    BL1: RAM 0x4035000 - 0x403c000
+INFO:    BL1: Loading BL2
+INFO:    Loading image id=1 at address 0x4014000
+INFO:    Image id=1 loaded: 0x4014000 - 0x401a210
+NOTICE:  BL1: Booting BL2
+INFO:    Entry point address = 0x4014000
+INFO:    SPSR = 0x3c5
+NOTICE:  BL2: v1.4(debug):v1.4-307-g3b39efa4
+NOTICE:  BL2: Built : 07:20:30, Nov 16 2017
+INFO:    BL2: Doing platform setup
+INFO:    Configuring TrustZone Controller
+INFO:    BL2: Loading image id 3
+INFO:    Loading image id=3 at address 0x4023000
+INFO:    Image id=3 loaded: 0x4023000 - 0x402d180
+INFO:    BL2: Loading image id 5
+INFO:    Loading image id=5 at address 0x88000000
+INFO:    Image id=5 loaded: 0x88000000 - 0x88042790
+NOTICE:  BL1: Booting BL31
+INFO:    Entry point address = 0x4023000
+INFO:    SPSR = 0x3cd
+NOTICE:  BL31: v1.4(debug):v1.4-307-g3b39efa4
+NOTICE:  BL31: Built : 07:20:30, Nov 16 2017
+INFO:    GICv3 with legacy support detected. ARM GICV3 driver initialized in EL3
+INFO:    BL31: Initializing runtime services
+INFO:    BL31: Preparing for EL3 exit to normal world
+INFO:    Entry point address = 0x88000000
+INFO:    SPSR = 0x3c9
+
+
+U-Boot 2017.07-rc3-ga624e22f08 (Nov 16 2017 - 07:37:46 +0000) vexpress_aemv8a fvp aarch64 semi, Build: jenkins-armlt-platforms-release-57
+
+DRAM:  2 GiB
+Flash: 64 MiB
+*** Warning - bad CRC, using default environment
+
+In:    serial_pl01x
+Out:   serial_pl01x
+Err:   serial_pl01x
+Net:   SMC91111-0
+Hit any key to stop autoboot:  0
+smh_open: ERROR fd -1 for file 'devtree.dtb'
+semihosting load failed, try booting with contents of DRAM
+## Loading init Ramdisk from Legacy Image at 84000000 ...
+   Image Name:   Dummy ramdisk
+   Image Type:   AArch64 Linux RAMDisk Image (uncompressed)
+   Data Size:    512 Bytes = 512 Bytes
+   Load Address: 84000000
+   Entry Point:  84000000
+   Verifying Checksum ... OK
+## Flattened Device Tree blob at 82000000
+   Booting using the fdt blob at 0x82000000
+   Using Device Tree in place at 0000000082000000, end 0000000082005708
+
+Starting kernel ...
+</pre>
+            </li>
+            <li>
+            <div class="para">Code execution stops on the entry point of the kernel in EL2 (corresponding to the symbol "efi_head").
+            Notice in the <span class="interface">Debug Control</span> view that execution has stopped on Core 0 of the SMP cluster - the other cores are powered down.
+            You should see in the <span class="interface">Commands</span> view:</div>
+<pre class="code">
+Execution stopped in EL2h mode at breakpoint 1: EL2:0x0000000080080000
+On core ARMAEMv8-A_MP_0 (ID 0)
+EL2:0x0000000080080000   ADD      x13,x18,#0x16
+Deleted temporary breakpoint: 1
+</pre>
+            </li>
+            <li>
+            <div class="para">The "efi_head" veneer comprises an ADD instruction followed by a branch.
+            The ADD instruction has no meaningful effect except that its opcode forms a magic signature required by UEFI.
+            Single-step twice (press F5, F5) to reach EL2:0x80B00000 (this corresponds to the symbol "stext", the main entry point of the kernel).</div>
+            </li>
+        </ol>
+    </div>
+
+    <div class="indent">
+        <a name="Debugging_the_Kernel_:_Pre-MMU_Stage"></a><h2>Debugging the Kernel : Pre-MMU Stage</h2>
+        <ol>
+            <li>
+            <div class="para">Code execution is stopped at the breakpoint, and the Disassembly view shows the assembly code, but no source code is shown yet, 
+            because the vmlinux symbols have not yet been loaded.  In the <span class="interface">Command</span> entry field (at the bottom of the <span class="interface">Commands</span> view) enter:</div>
+<pre class="code">
+set os physical-address 0x80080000
+add-symbol-file "path\to\vmlinux"
+</pre>
+            <div class="para">Fix-up the "\path\to" to point to the real folder on your hard-disk where the vmlinux file can be found, for example, inside <span class="arg">fvp-latest-oe-debug</span>.</div>
+            <div class="para">Explanation: Debug symbols in the vmlinux file have virtual addresses, so can normally only be used to debug when Linux is up and running with the MMU enabled.  
+            To debug pre-MMU physical addresses at source-level, an offset must be applied to the addresses in the vmlinux file.  
+            The offset between the physical and virtual addresses is calculated by the Debugger using the physical address given in the <span class="arg">set os physical-address</span> command
+            and the virtual address read from the ELF header of the vmlinux file.
+            The physical address at which the kernel is loaded comes from the model parameter: <span class="arg">--data cluster0.cpu0=Image@0x80080000</span>.  
+            This in turn comes from the U-Boot environment variable kernel_addr.</div>
+            </li>
+            <li>
+            <div class="para">Check the following appears in the Command view, to confirm Linux kernel support has been enabled:</div>
+<pre class="code">
+Enabled Linux kernel support for version "Linux 4.12.0 #1 SMP PREEMPT Thu Nov 16 07:37:36 UTC 2017 aarch64"
+</pre>
+            <div class="para">Symbol names now appear in the Disassembly view, with the PC at the symbol <span class="arg">stext</span>.</div>
+            </li>
+            <li>
+            <div class="para">The Debugger will try to open <span class="arg">.../arch/arm64/kernel/head.S</span> in its <span class="interface">Editor</span> view.
+            If it does not find the kernel sources in paths relative to those specified in the vmlinux file, a button appears inviting you to set a path substitution.
+            Press on the button to open a dialog to set a substitute source path, to re-direct paths from where the kernel was built to where the kernel source tree is located on your hard-disk.
+            If you need to revisit these paths later, this dialog can be opened by clicking on <span class="interface">View Menu</span> (the upside-down triangle) 
+            on the <span class="interface">Debug Control</span> view toolbar, then selecting <span class="interface">Path Substitution...</span>.</div>
+            </li>
+            <li>
+            <div class="para">That's all the set-up now done.  You can now view registers, view variables, view memory, set breakpoints and watchpoints, single-step, and all the other usual debug operations at this pre-MMU stage, all at source level.</div>
+            <div class="para">In the <span class="interface">Registers</span> view, expand <span class="interface">AArch64</span>, then expand the <span class="interface">Core</span> and <span class="interface">System</span> register groups.</div>
+            <div class="para">At the kernel entry point, you can check the Core and System registers are set as recommended by <a href="https://www.kernel.org/doc/Documentation/arm64/booting.txt" title="External link"><i>booting.txt</i></a>.</div>
+            <ul>
+                <li>
+                <div class="para">Primary CPU general-purpose register settings</div>
+                <div class="para">X0 = physical address of device tree blob (dtb) in system RAM (= 0x82000000)</div>
+                <div class="para">X1 = 0 (reserved for future use)</div>
+                <div class="para">X2 = 0 (reserved for future use)</div>
+                <div class="para">X3 = 0 (reserved for future use)</div>
+                </li>
+                <li>
+                <div class="para">CPU mode</div>
+                <div class="para">All forms of interrupts must be masked in PSTATE.DAIF (Debug, SError, IRQ and FIQ).  You can check this in <span class="menu">AArch64<span class="para"> → </span>System<span class="para"> → </span>PSTATE<span class="para"> → </span>DAIF</span>
+</div>
+                <div class="para">The CPU must be in either EL2 (recommended in order to have access to the virtualisation extensions) or non-secure EL1.</div>
+                <div class="para">You can check this in <span class="menu">AArch64<span class="para"> → </span>System<span class="para"> → </span>PSTATE<span class="para"> → </span>Mode</span> or by typing: <span class="arg">output $AARCH64::$System::$PSTATE::$Mode.M</span>
+</div>
+                </li>
+                <li>
+                <div class="para">Caches, MMUs</div>
+                <div class="para">The MMU must be off - see <span class="menu">AArch64<span class="para"> → </span>System<span class="para"> → </span>Other<span class="para"> → </span>SCTLR_EL2.M</span>
+</div>
+                <div class="para">Instruction cache may be on or off - see <span class="menu">AArch64<span class="para"> → </span>System<span class="para"> → </span>Other<span class="para"> → </span>SCTLR_EL2.I</span>
+</div>
+                <div class="para">Data cache is off - see <span class="menu">AArch64<span class="para"> → </span>System<span class="para"> → </span>Other<span class="para"> → </span>SCTLR_EL2.C</span>
+</div>
+                </li>
+            </ul>
+            </li>
+            <li>
+            <div class="para">The kernel code here executes in EL2, and the kernel symbols have been loaded for EL2, but most of the kernel code later runs in EL1N.
+            To see where the change from EL2 to EL1N occurs, search <span class="arg">head.S</span> using <span class="menu">Edit<span class="para"> → </span>Find/Replace...</span> for the <span class="arg">eret</span> instruction.  It is at the end of <span class="arg">el2_setup</span>:</div>
+<pre class="code">
+:
+	mov	w0, #BOOT_CPU_MODE_EL2		// This CPU booted in EL2
+	eret
+ENDPROC(el2_setup)
+</pre>
+            <div class="para">Double-click on the far left-hand side of the eret line to set a breakpoint, then <span class="interface">Continue</span> (or press <span class="interface">F8</span>) running to it.
+            The processor is still currently in EL2:</div>
+<pre class="code">
+Execution stopped in EL2h mode at breakpoint 1: EL2:0x00000000808BC138
+On core ARMAEMv8-A_MP_0 (ID 0)
+EL2:0x00000000808BC138   527,0   eret
+</pre>
+            </li>
+            <li>
+            <div class="para">Now single Step Source Line (or press <span class="interface">F5</span>).  The processor switches to EL1N:</div>
+<pre class="code">
+Execution stopped in EL1h mode at EL1N:0x0000000080B00008
+On core ARMAEMv8-A_MP_0 (ID 0)
+In head.S
+EL1N:0x0000000080B00008   119,0   adrp	x23, __PHYS_OFFSET
+</pre>
+            <div class="para">The Debugger automatically reloads the vmlinux symbols, and applies them to the EL1N pre-MMU memory space.
+            The <span class="interface">Editor</span> view updates automatically using these new symbols to show the correct position of the PC in the source file <span class="arg">head.S</span>.</div>
+            </li>
+            <li>
+            <div class="para">To see where the MMU will be turned on, set a breakpoint with:</div>
+            <div class="para"><span class="arg">thbreak __enable_mmu</span></div>
+            <div class="para">then <span class="interface">Continue</span> (<span class="interface">F8</span>) running to it.</div>
+            <div class="para">Note: in earlier kernels, this function was named <span class="arg">__turn_mmu_on</span>.  In some even earlier kernels, it had file-static scope, so a special notation was needed:</div>
+            <div class="para"><span class="arg">thbreak EL1N:("head.o"::__turn_mmu_on)</span></div>
+            </li>
+            <li>
+            <div class="para">Single-step through to the "msr sctlr_el1, x0" instruction.  In the <span class="interface">Registers</span> view, 
+            check <span class="menu">AArch64<span class="para"> → </span>System<span class="para"> → </span>Other<span class="para"> → </span>SCTLR_EL1</span>, M bit that the MMU is still off</div>
+            </li>
+            <li>
+            <div class="para">Single-step the "msr sctlr_el1, x0" instruction, and see the M bit change to 1 showing the MMU is now on</div>
+            </li>
+            <li>
+            <div class="para">To see the transition to high-address space (0xFFFFFF8xxxxxxxxx) continue single-stepping until <span class="arg">__primary_switched</span> is reached.</div>
+            <div class="para">Note: in earlier kernels, this function was named <span class="arg">__mmap_switched</span>.</div>
+            <div class="para">The Debugger detects this transition and automatically reloads the vmlinux symbols, and applies them to the EL1N post-MMU memory space (with a zero offset).</div>
+            </li>
+        </ol>
+    </div>
+
+    <div class="indent">
+        <a name="Debugging_the_Kernel_:_Post-MMU_Stage"></a><h2>Debugging the Kernel : Post-MMU Stage</h2>
+        <div class="para">You can now view registers, view variables, view memory, set breakpoints and watchpoints, single-step, and all the other usual debug operations at this post-MMU stage, all at source level.</div>
+        <ol>
+            <li>
+            <div class="para">The main C code entry into the kernel, after all the architecture-specific setup has been done, is <span class="arg">start_kernel()</span> in <span class="arg">/source/init/main.c</span>.
+            Set a breakpoint on it with:</div>
+            <div class="para"><span class="arg">thbreak start_kernel</span></div>
+            <div class="para">then <span class="interface">Continue</span> (<span class="interface">F8</span>) running to it.</div>
+            </li>
+            <li>
+            <div class="para">Set the next breakpoint with:</div>
+            <div class="para"><span class="arg">thbreak kernel_init</span></div>
+            <div class="para">then <span class="interface">Continue</span> (<span class="interface">F8</span>) running to it.</div>
+            </li>
+            <li>
+            <div class="para">So far, CPU 0 has been doing all the work - the other ("secondary") CPUs are still "asleep" (in WFI) awaiting an interrupt.
+            You can check this by selecting one of the other cores in the <span class="interface">Debug Control</span> view.
+            The next steps explore the release of the secondary processors.</div>
+            </li>
+            <li>
+            <div class="para">Secondary processors are released from their holding pen by CPU0 executing smp_prepare_cpus().  Set a breakpoint on this with:</div>
+            <div class="para"><span class="arg">thbreak smp_prepare_cpus</span></div>
+            <div class="para">then <span class="interface">Continue</span> (<span class="interface">F8</span>) running to it.</div>
+            </li>
+            <li>
+            <div class="para">In the <span class="interface">Debug Control</span> view, notice that Core 0 is in C code with its MMU on, and has started some threads,
+            but the other cores are still "asleep" awaiting an interrupt (WFI) with their MMU off.  Set a breakpoint (note: not a temporary one this time) with:</div>
+            <div class="para"><span class="arg">hbreak secondary_start_kernel</span></div>
+            <div class="para">then <span class="interface">Continue</span> (<span class="interface">F8</span>) running to it.</div>
+            <div class="para">In <span class="interface">Debug Control</span> view, notice that Core 1 has woken up and has stopped at the breakpoint.</div>
+            <div class="para">Run again.  Core 2 will hit the same breakpoint.</div>
+            <div class="para">Run again.  Core 3 will hit the same breakpoint.  All secondary CPUs have now been released from the holding pen.  The secondary CPUs all then enter cpu_do_idle() until the primary CPU gives them some work to do.</div>
+            </li>
+        </ol>
+        <div class="para">Many of the above steps can be automated, either with a script file, or by filling-in the Debug Configuration's fields before launching.</div>
+        <ol>
+            <li>
+            <div class="para">The same Linux version information as was automatically reported earlier can also be reported again manually with:</div>
+            <div class="para"><span class="arg">info os-version</span></div>
+            <div class="para">which will show, for example:</div>
+            <div class="para"><span class="arg">Operating system version: Linux 4.12.0 #1 SMP PREEMPT Thu Nov 16 07:37:36 UTC 2017 aarch64</span></div>
+            <div class="para">This is similar to:</div>
+            <div class="para"><span class="arg">output init_nsproxy.uts_ns-&gt;name</span></div>
+            <div class="para">which will show, for example:</div>
+            <div class="para"><span class="arg">{sysname = "Linux", nodename = "genericarmv8", release = "4.12.0", version = "#1 SMP PREEMPT Thu Aug 10 12:31:46 UTC 2017", machine = "aarch64", domainname = "(none)"}</span></div>
+            </li>
+            <li>
+            <div class="para">When OS awareness is enabled and kernel symbols are loaded from the vmlinux file, the Debugger will try to access some locations in the kernel.
+            For example, it will try to read <span class="arg">init_nsproxy.uts_ns-&gt;name</span> to get the kernel name and version.
+            It will also set breakpoints automatically on <span class="arg">SyS_init_module()</span>, <span class="arg">SyS_finit_module()</span> and <span class="arg">SyS_delete_module()</span> to trap
+            when kernel modules are inserted (insmod) and removed (rmmod).  You will see these "Debugger Internal SW" breakpoints appearing in the Breakpoints view.
+            These breakpoints are handled automatically by the debugger - the user has no control over them, and cannot enable or disable them.
+            When one of these breakpoints is hit, the debugger performs a corresponding action automatically, and then restarts program execution itself.</div>
+            </li>
+        </ol>
+    </div>
+
+    <div class="indent">
+        <a name="Debugging_the_Kernel_:_Thread_awareness"></a><h2>Debugging the Kernel : Thread awareness</h2>
+        <div class="para">Now that the kernel is up and running, you can debug with full thread awareness.</div>
+        <ol>
+            <li>
+            <div class="para">The current state of the cores are displayed in the <span class="interface">Debug Control</span> view.  To show the threads, right-mouse-click on the connection, then select <span class="interface">Display Threads</span>.
+                The current thread is shown, and you can also expand <span class="interface">Active Threads</span> and <span class="interface">All Threads</span>.</div>
+            <div class="para">Note the context for the (linked) Trace view changes from "core" to "thread" too, so that you can now see in the <span class="interface">Trace</span> view the instructions that were executed for the current thread.</div>
+            </li>
+            <li>
+            <div class="para">A useful feature during kernel bring-up is to be able to view earlyprintk (also known as bootconsole) and regular Console output, in particular,
+            if the console is not enabled (so there would be no output from the serial port), or if you have no serial port connected.  The entire log so far can be viewed with:</div>
+            <div class="para"><span class="arg">info os-log</span></div>
+            <div class="para">To view the log output line by line, as it happens, use:</div>
+            <div class="para"><span class="arg">set os log-capture on</span></div>
+            </li>
+            <li>
+            <div class="para">In the <span class="interface">Debug Control</span> view, expand "Active Threads" and "All Threads".  In "All Threads", you will see several threads/processes have been created.
+            Only four are actually running, one on each of the four cores - you can see these in "Active Threads".
+            You can view the state of the cores, threads and processes on the command-line with:</div>
+            <div class="para"><span class="arg">info cores</span></div>
+            <div class="para"><span class="arg">info threads</span></div>
+            <div class="para"><span class="arg">info processes</span></div>
+            </li>
+            <li>
+            <div class="para">It is possible to single-step a core or a thread/process.  To do so, select either the core or the thread/process in the <span class="interface">Debug Control</span> view, then press "Step" (F5).
+            Note that when single-stepping through a process, it might get migrated to another core.  If a breakpoint is set on a process, the Debugger can track the
+            migration of process-specific breakpoints to the other core.</div>
+            </li>
+            <li>
+            <div class="para">To view the kernel's Task Control Block, first check the kernel's stack size with:</div>
+            <div class="para"><span class="arg">show os kernel-stack-size</span></div>
+            <div class="para">For this Armv8-A kernel, the kernel stack size is 16K.</div>
+            <div class="para">In the <span class="interface">Expressions</span> view, add a new expression:</div>
+            <div class="para"><span class="arg">(struct task_struct*)($SP_EL0)</span></div>
+            <div class="para">Note: for earlier kernels use <span class="arg">(struct thread_info*)($SP_EL1 &amp; ~0x3FFF)</span>
+</div>
+            <div class="para">0x3FFF is 16K minus 1.  Expand the tree structure to explore its contents. The list of threads in the <span class="interface">Debug Control</span> view is created from the same information,
+            so they should match.  For example, the current thread name is held in the structure member <span class="arg">comm</span>.</div>
+            </li>
+            <li>
+            <div class="para">The next steps give a simple view into the workings of the scheduler. Clear all existing breakpoints, then set a breakpoint:</div>
+            <div class="para"><span class="arg">hbreak schedule</span></div>
+            <div class="para">then <span class="interface">Continue</span> (<span class="interface">F8</span>) running to it.  At the breakpoint, <span class="interface">Continue</span> (<span class="interface">F8</span>) running 
+            again and again, and see the names of the active threads changing in "Active Threads", and different threads being scheduled-in.</div>
+            </li>
+            <li>
+            <div class="para">Delete all your breakpoints, then <span class="interface">Continue</span> (<span class="interface">F8</span>) running, and let the kernel run all the way to the Linux prompt.
+            The four Linux penguin ("Tux") mascots will appear on the model's LCD screen, and boot log messages will be displayed in the terminal.</div>
+            <div class="para"><span class="arg">root@genericarmv8:~#</span></div>
+            </li>
+            <li>
+            <div class="para">Interrupt (<span class="interface">F9</span>) execution, place a breakpoint on do_fork(), then restart.  If nothing forks, force a fork by typing 'ls'.</div>
+            </li>
+        </ol>
+        <div class="para">In summary, we have looked at how Development Studio can be used to debug the Armv8-A Linux kernel, at both pre-MMU enable and post-MMU enable stages, and looked at a few of the kernel's internal features.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Known_issues_and_troubleshooting"></a><h2>Known issues and troubleshooting</h2>
+        <ul>
+            
+    <li>
+<div class="para">On Windows 7 and later, launching a debug configuration to connect to a Fixed Virtual Platform (FVP) model may give the following error: <span class="arg">Windows cannot find "C:\Windows\System32\telnet.exe"</span> or <span class="arg">No telnet executable was found on your system</span>.  Arm FVP models make use of "telnet" as a serial terminal, to enable serial data to be transferred from application code running on an Arm FVP via a modelled UART to a serial terminal.  This error occurs when the telnet client is disabled or otherwise unavailable on your computer.  The telnet client is not enabled by default on Windows 7 and later.  To enable the telnet client on Windows 10:</div>
+        <ol>
+            <li><div class="para">Right-click on the Start menu, then select "Settings"</div></li>
+            <li><div class="para">Search for "Telnet", and select "Turn Windows features on or off"</div></li>
+            <li><div class="para">From the list that appears, tick the "Telnet Client" checkbox</div></li>
+            <li><div class="para">Click "OK" to close the dialog.</div></li>
+        </ol>
+    </li>
+
+        </ul>
+    </div>
+
+    <h2>See also:</h2>
+<div class="indent"><ul>
+        <li><div class="para"><a href="../hello_linux/readme.html"><i>Example to show how to build a simple Hello World application in C for Arm Linux with gcc</i></a></div></li>
+    </ul></div>
+</div>
+<div class="double_dotted_divider"></div>
+<div class="footer">Copyright© 2010-2022 Arm Limited (or its affiliates). All rights reserved.</div>
+</body>
+</html>
