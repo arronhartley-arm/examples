@@ -1,0 +1,167 @@
+<html xmlns:fn="http://www.w3.org/2005/xpath-functions">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>SVE2 Skip White Space example</title>
+<style type="text/css">
+    body { font-size: 62.5%;    /* default 1.0em = 16px, so 62.5% of 16 = 10. Therefore, 1.0em now = 10px, 1.2em now = 12px etc. */
+        font-family: Verdana, Arial, "Lucida Grande", sans-serif; margin: 10px; padding: 0; background: #fff; min-width: 999px; }
+    /* Content Styling */
+    .para { font-size: 1.2em; margin-bottom: 0px; margin-top: 10px; }
+    p { font-size: 1.2em; margin-bottom: 0px; margin-top: 10px; }
+    h1 { font-size: 1.6em; color: #025066; margin-top: 0px; margin-bottom: 0px; }
+    h2 { font-size: 1.4em; font-weight: bold; color: #025066; margin-bottom: 0px; }
+    h3 { font-size: 1.2em; font-weight: bold; color: #025066; margin-bottom: 0px; }
+    a { color: #127490; }
+    a:hover { color: #014153; }
+    div.indent { margin-left:10px; margin-right: 10px; margin-bottom: 0px; margin-top: 10px; }
+    div.note { font-size: 1.0em; margin-left:10px; margin-right: 10px; margin-bottom: 0px; margin-top: 10px; }
+    .table { margin-top: 5px; margin-bottom: 5px; padding:0px; }
+    ul li { font-size: 1.0em; list-style-image: url(images/bullet_blue.png); }
+    div.toc ul li { font-size: 1.0em; list-style-image: url(images/bullet_blue.png); }
+    .table-cell { font-size: 75%; }
+    .image { margin-top: 5px; margin-bottom: 5px; padding:0px; }
+    .note { margin-bottom: 15px; background: #E0E0E0 }
+    .toc { font-size: 115%; margin-left: 20px; margin-top: 10px; margin-bottom: 15px; }
+    .italic { font-style: italic; }
+    .bold { font-weight: bold; }
+    .emphasis { font-weight: bold; font-style: italic; }
+    .underline { text-decoration: underline; }
+    .bold-underline { text-decoration: underline; font-weight: bold; }
+    .arg { font-family: 'Lucida Sans Typewriter', 'Courier New', Courier, monospace; color:#333399; }
+    .repl { font-style: italic; }
+    .code { font-size: 1.2em; margin-top: 2px; margin-left: 20px; margin-bottom: 2px; color: #333399;
+       font-family: 'Lucida Sans Typewriter', 'Courier New', Courier, monospace; }
+    .menu { font-weight: bold; }
+    .interface { font-weight: bold; }
+    ul {margin-top: 2px; margin-bottom: 5px; }
+    ol {list-style-type:decimal; margin-top: 2px; margin-bottom: 5px; }
+    ol ol {list-style-type:lower-alpha; margin-top: 2px; margin-bottom: 5px; }
+    ol ol ol {list-style-type:lower-roman; margin-top: 2px; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    
+    <a name="SVE2_Skip_White_Space_example"></a><h1>SVE2 Skip White Space example - Arm®Development Studio</h1>
+    
+        <div class="para">A simple C application, showing the use of Scalable Vector Extension 2 (SVE2) assembler to perform "skip white space".</div>
+    
+
+    <div class="indent">
+        <a name="Purpose_and_scope"></a><h2>Purpose and scope</h2>
+        <div class="para">This is a simple C application, that shows the use of Scalable Vector Extension 2 (SVE2) assembler to perform a "skip white space" function.</div>
+        <div class="para">The "skip white space" function uses the SVE2 NMATCH instruction to skip the leading white space in a string.</div>
+        <div class="para">This example illustrates how build SVE2 assembler with Arm Compiler for Embedded 6, run it on an FVP model, and debug it with the Debugger.</div>
+        <div class="para">This example is derived from the "skipwhitespace" example provided with these <a href="https://developer.arm.com/documentation/dai0548/latest" title="External link"><i>SVE Programming Examples</i></a>.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Building_the_example"></a><h2>Building the example</h2>
+        <div class="para">A ready-made executable <span class="arg">sve2_skip_white_space.axf</span> is provided, pre-built with Arm Compiler for Embedded 6.</div>
+        <div class="para">If you wish to modify or rebuild this example, you can do so using the supplied Eclipse (makefile builder) project, or directly on the command line with the supplied <span class="arg">Makefile</span>.</div>
+    </div>
+
+    <div class="indent">
+        <a name="Building_on_the_command-line"></a><h2>Building on the command-line</h2>
+        <div class="para">To build the example on the command-line with the supplied <span class="arg">make</span> utility:</div>
+        
+        <ul>
+           <li><div class="para">On Windows, open an <span class="interface">Arm DS Command Prompt</span> from the Start menu, run the <span class="arg">select_toolchain</span> utility, and select <span class="arg">Arm Compiler for Embedded 6</span> from the list</div></li>
+           <li><div class="para">On Linux, run the <span class="arg">suite_exec</span> utility with the <span class="arg">--toolchain</span> option to select the compiler and start a shell configured for the Development Studio environment, for example: <span class="arg">~/developmentstudio/bin/suite_exec --toolchain "Arm Compiler for Embedded 6" bash</span>
+</div></li>
+        </ul>
+
+        <div class="para">Then navigate to the <span class="arg">...\sve2_skip_white_space</span> directory, and type:</div>
+        <div class="para"><span class="arg">make</span></div>
+        <div class="para">The usual <span class="arg">make</span> rules: <span class="arg">clean</span> and <span class="arg">all</span> are provided in the <span class="arg">makefile</span>.</div>
+    </div>
+
+    
+    <div class="indent">
+        <a name="Building_within_the_IDE"></a><h2>Building within the IDE</h2>
+        <div class="para">To build the supplied projects within the IDE:</div>
+        
+    <ol>
+        <li><div class="para">In the Project Explorer view, select the project you want to build.</div></li>
+        <li><div class="para">Select <span class="menu">Project<span class="para"> → </span>Build Project</span>.</div></li>
+    </ol>
+
+    </div>
+
+
+    <div class="indent">
+        <a name="Running_the_example"></a><h2>Running the example</h2>
+        <ol>
+            <li><div class="para">Select <span class="menu">Run<span class="para"> → </span>Debug Configurations...</span>.</div></li>
+            <li><div class="para">Select <span class="arg">sve2_skip_white_space</span> from the list of <span class="interface">Generic Arm C/C++ Application</span> configurations.</div></li>
+            <li><div class="para">Click on <span class="interface">Debug</span> to start debugging.  The executable image will be downloaded to the target, then starts executing, and stops at <span class="arg">main()</span>.</div></li>
+            <li>
+<div class="para">Run the executable by clicking on the green <span class="interface">Continue</span> button in the <span class="interface">Debug Control</span> view, or by pressing F8 on the keyboard.
+            The following output is displayed in the <span class="interface">Target Console</span>.</div>
+<pre class="code">
+SVE2 Skip White Space example using NMATCH instruction
+
+Input string  = '   Hello   '
+Output string = 'Hello   '
+</pre>
+            </li>
+            <li><div class="para">Disconnect the debug connection by double-clicking on <span class="arg">sve2_skip_white_space</span> that is now in the <span class="interface">Debug Control</span> view.</div></li>
+        </ol>
+        <div class="para">You can also run the example executable directly on the FVP model from within the <span class="interface">Arm DS Command Prompt</span> on Windows or the <span class="arg">suite_exec</span> shell on Linux with, for example:</div>
+<pre class="code">
+FVP_Base_Neoverse-N2x1 --plugin="[Arm DS installation folder]/sw/models/bin/ScalableVectorExtension.so" -C SVE.ScalableVectorExtension.has_sve2=1 -C bp.secure_memory=false -a sve2_skip_white_space.axf
+</pre>
+    </div>
+
+    <div class="indent">
+        <a name="Debugging_the_example"></a><h2>Debugging the example</h2>
+        <ol>
+            <li><div class="para">Re-establish the debug connection by double-clicking on <span class="arg">sve2_skip_white_space</span> in the <span class="interface">Debug Control</span> view.</div></li>
+            <li><div class="para">In <span class="arg">main.c</span>, observe that main() first initializes a test string, then calls DisableSveTraps(), then calls SkipWhiteSpace().  
+            Both DisableSveTraps and SkipWhiteSpace are functions written in assembler in <span class="arg">skip_white_space.S</span>.  
+            SkipWhiteSpace takes two parameters - the start and end of the string, in x0 and x1 respectively.</div></li>
+            <li><div class="para">Open <span class="arg">skip_white_space.S</span> and set a breakpoint on both DisableSveTraps and SkipWhiteSpace.</div></li>
+            <li><div class="para">In the <span class="interface">Registers</span> view, expand AArch64 &gt; System &gt; Secure &gt; CPTLR_EL3.
+            Notice the EZ bit is initially 0 and the TFP bit is set to 1, meaning SVE instructions will be trapped, unless these bits are inverted.</div></li>
+            <li><div class="para">Single-step over the MRS, BIC, ORR, MSR, ISB instructions, and observe the EZ bit being set to 1 and the TFP bit being cleared, thereby disabling the SVE and SIMD traps.</div></li>
+            <li><div class="para">Continue running to the breakpoint on SkipWhiteSpace.</div></li>
+            <li><div class="para">In the <span class="interface">Registers</span> view, expand AArch64 &gt; SVE &gt; Data &gt; Z1 &gt; S32.  Right-mouse-click on Z1.S32[0] and select display in Hexadecimal.</div></li>
+            <li><div class="para">Single-step over the MOV w3, ADD w3, MOV z1.s instructions, and observe the Z1.S32[0] being set to 0x0D090A20, which is ASCII for '\r\t\n '.</div></li>
+            <li><div class="para">In the <span class="interface">Registers</span> view, expand AArch64 &gt; SVE &gt; Predicate.</div></li>
+            <li><div class="para">Single-step over the WHILELT instruction, and observe the predicate register P0 being set to 0x7FF, representing the 11 characters of the input string.</div></li>
+            <li><div class="para">To see a full description of the WHILELT instruction, or any other instruction in this example, simply hover the mouse over the instruction, in either the source editor or <span class="interface">Disassembly</span> views.</div></li>
+            <li><div class="para">In the <span class="interface">Registers</span> view, expand AArch64 &gt; SVE &gt; Data &gt; Z0 &gt; S8.  Right-mouse-click on Z0.S8[0] and select display as a Character.</div></li>
+            <li><div class="para">Single-step over the LD1B instruction, and observe Z0.S8 being set to the charcters of the input string.</div></li>
+            <li><div class="para">Single-step over the NMATCH instruction, and observe the predicate register P1 being set to 0xF8, representing the positions of the 5 non-white-space characters of the input string.</div></li>
+            <li><div class="para">Single-step to and over the BRKB instruction, and observe the predicate register P2 being set to 0x7, representing the 3 leading white-space characters of the input string.</div></li>
+            <li><div class="para">Single-step over the INCP instruction, and observe x0 being incremented by 3, thereby discarding the leading white-space characters.</div></li>
+            <li><div class="para">Single-step over the MOV and RET instructions, which return the start of the resulting string, stripped of its leading white-space characters, in x2.</div></li>
+            <li><div class="para">Continue running the executable by clicking on the green <span class="interface">Continue</span> button in the <span class="interface">Debug Control</span> view, or by pressing F8 on the keyboard.</div></li>
+        </ol>
+
+        <div class="para">To capture a history of instruction execution ("trace") from the FVP model and view it in the Debugger, first disconnect any existing debug session, then:</div>
+        <ol>
+            <li><div class="para">In the <span class="interface">Project Explorer</span> view, double-click on <span class="arg">sve2_skip_white_space.launch</span>.</div></li>
+            <li><div class="para">In the <span class="interface">Edit Configuration</span> dialog, press the "DTSL Options" <span class="interface">Edit...</span> button.</div></li>
+            <li><div class="para">In the <span class="interface">DTSL Configuration</span> dialog, select <span class="interface">Model Trace</span> in the <span class="interface">Trace Buffer</span> tab,
+                and select <span class="interface">Enable Neoverse N2 trace</span> in the <span class="interface">Core Trace</span> tab, then press <span class="interface">OK</span>.</div></li>
+            <li><div class="para">In the <span class="interface">Edit Configuration</span> dialog, press the <span class="interface">Debug</span> button.</div></li>
+            <li><div class="para">Open the <span class="interface">Trace</span> view.</div></li>
+            <li><div class="para">Run and debug as before.  A history of instruction execution is displayed in the <span class="interface">Trace</span> view.</div></li>
+        </ol>
+    </div>
+
+    <h2>See also:</h2>
+<div class="indent"><ul>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101469/latest/Debugging-code/Overview--Debug-connections-in-Arm-Debugger"><i>Debug connections in Arm Debugger</i> in <i>Arm Development Studio Getting Started Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101470/latest/"><i>Arm Development Studio User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101471/latest/"><i>Arm Debugger Command Reference</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100966/latest/"><i>Fixed Virtual Platforms FVP Reference Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100955/latest"><i>DSTREAM User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100748/latest/"><i>Arm Compiler for Embedded 6 User Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/101754/latest"><i>Arm Compiler for Embedded 6 Reference Guide</i></a></div></li>
+        <li><div class="para"><a href="https://developer.arm.com/documentation/100066/latest/"><i>Arm Compiler for Embedded 6 Software Development Guide</i></a></div></li>
+    </ul></div>
+<br><br><div align="left" class="legal">
+<hr>Copyright© 2010-2022 Arm Limited (or its affiliates). All rights reserved.</div>
+</body>
+</html>
